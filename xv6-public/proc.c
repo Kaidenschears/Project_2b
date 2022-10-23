@@ -214,11 +214,13 @@ fork(void)
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
   pid = np->pid;
+  
 
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
   np->priority=curproc->priority; //sets priority to the same as parent process 
+  np->ticks=0;
 
   release(&ptable.lock);
 
@@ -327,6 +329,7 @@ void
 scheduler(void)
 {
   struct proc *p;
+  struct proc *p_iter;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -336,14 +339,27 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    int curPriority=0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      curPriority=0;
+      for(p_iter = ptable.proc; p_iter  < &ptable.proc[NPROC]; p_iter++){ //checks for 
+        if(p_iter->priority > curPriority)
+          curPriority=p_iter->priority;
+    }
       if(p->state != RUNNABLE)
         continue;
+      if (curPriority==0){
+          c->proc = p;
+      }
+      else{
+        c->proc = p;
+      }
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = p;
+    
+      
       switchuvm(p);
       p->state = RUNNING;
       p->ticks++;
