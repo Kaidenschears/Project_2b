@@ -6,6 +6,8 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "pstat.h"
+
 
 struct {
   struct spinlock lock;
@@ -88,7 +90,8 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-
+  p->priority=1; //set default priority f
+  p->ticks=0;
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -215,6 +218,7 @@ fork(void)
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
+  np->priority=curproc->priority; //sets priority to the same as parent process 
 
   release(&ptable.lock);
 
@@ -342,6 +346,7 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+      p->ticks++;
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -379,6 +384,7 @@ sched(void)
   intena = mycpu()->intena;
   swtch(&p->context, mycpu()->scheduler);
   mycpu()->intena = intena;
+
 }
 
 // Give up the CPU for one scheduling round.
@@ -531,4 +537,32 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+int getpinfo(struct pstat *ptr){
+  struct proc *p;
+  int i=0;
+   acquire(&ptable.lock);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++,i++){
+
+      if(p->state != UNUSED)
+        ptr->inuse[i]=1;
+      else
+        ptr->inuse[i]=0;
+
+      ptr->pid[i]=p->pid;
+
+      ptr->priority[i]=p->priority;
+
+      ptr->ticks[i]=p->ticks;
+
+
+    }
+    release(&ptable.lock);
+  return 0;
+}
+int settickets(int num){
+  struct proc *p = myproc();
+  p->priority=num;
+  return 0;
 }
