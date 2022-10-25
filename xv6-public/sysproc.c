@@ -103,3 +103,11 @@ int sys_settickets(void){
     return -1;
   return settickets(priority);
 }
+
+int sys_mprotect(void){
+  return 0;
+}
+
+int sys_munprotect(void){
+  return 0;
+}

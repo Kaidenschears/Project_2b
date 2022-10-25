@@ -27,6 +27,9 @@ int uptime(void);
 //--add same defs as in defs.h--
 int getpinfo(struct pstat *);
 int settickets(int number);
+int munprotect(void *addr, int len);
+int mprotect(void *addr, int len);
+
 
 // ulib.c
 int stat(const char*, struct stat*);

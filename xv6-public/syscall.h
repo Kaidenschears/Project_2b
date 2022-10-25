@@ -23,3 +23,5 @@
 //--define Sys call #s--
 #define SYS_getpinfo 22
 #define SYS_settickets 23
+#define SYS_mprotect 24
+#define SYS_munprotect 25

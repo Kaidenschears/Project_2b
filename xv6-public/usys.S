@@ -32,3 +32,5 @@ SYSCALL(uptime)
 
 SYSCALL(getpinfo)
 SYSCALL(settickets)
+SYSCALL(mprotect)
+SYSCALL(munprotect)

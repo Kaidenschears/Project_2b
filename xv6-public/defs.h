@@ -124,7 +124,8 @@ void            yield(void);
 //-----define syscalls here----
 int             getpinfo(struct pstat *);
 int             settickets(int num);
-
+int mprotect(void *addr, int len);
+int munprotect(void *addr, int len);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

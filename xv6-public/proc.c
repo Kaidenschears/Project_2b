@@ -339,21 +339,22 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    int curPriority=0;
+  
+    int h_p_count=0; //high priority process count 
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      curPriority=0;
-      for(p_iter = ptable.proc; p_iter  < &ptable.proc[NPROC]; p_iter++){ //checks for 
-        if(p_iter->priority > curPriority)
-          curPriority=p_iter->priority;
-    }
-      if(p->state != RUNNABLE)
+      if(h_p_count==0){
+      for(p_iter = ptable.proc; p_iter  < &ptable.proc[NPROC]; p_iter++){ //checks if higher priority process has arrived
+        if(p_iter->priority > 0 && p_iter->state==RUNNABLE){
+          h_p_count++;
+          }
+    }}
+      if(p->state != RUNNABLE || (h_p_count>0 && p->priority<1))
         continue;
-      if (curPriority==0){
-          c->proc = p;
-      }
-      else{
-        c->proc = p;
-      }
+    
+      c->proc = p;
+      if(h_p_count>0)
+        h_p_count--;
+     
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -583,5 +584,13 @@ int settickets(int num){
     p->priority=num;
   else
     return -1;
+  return 0;
+}
+
+int mprotect(void *addr, int len){
+  return 0;
+}
+
+int munprotect(void *addr, int len){
   return 0;
 }
