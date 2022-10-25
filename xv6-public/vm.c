@@ -385,10 +385,50 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
   return 0;
 }
 
-//PAGEBREAK!
-// Blank page.
-//PAGEBREAK!
-// Blank page.
-//PAGEBREAK!
-// Blank page.
 
+//function to set Page table entries between [addr,(len)*PGSIZE] to read only 
+int mprotect(void *addr, int len){
+  int c_addr=(int)addr; // address used for calculations
+  struct proc *curproc = myproc();
+  if (len<=0 ||c_addr+(len*PGSIZE)>curproc->sz|| PGROUNDUP(c_addr)!=c_addr){
+    return -1;
+  }
+  pte_t *pte;
+
+  for (int i = c_addr; i < (c_addr + (len) *PGSIZE); i+= PGSIZE){
+     pte = walkpgdir(curproc->pgdir,(void*) i, 0); // ith pte in pagetable
+    if(pte && ((*pte & PTE_U) != 0) && ((*pte & PTE_P) != 0) ){ // checks if pte is user program controlled entry and if it is present 
+      *pte = (*pte) & (~PTE_W) ; //Clear write bit 
+    } else {
+      return -1;
+    }
+
+  }
+
+  lcr3(V2P(curproc->pgdir)); 
+  return 0;
+}
+
+//function to set Page table entries between [addr,(len)*PGSIZE] to read and write
+int munprotect(void *addr, int len){
+  int c_addr=(int)addr; // address used for calculations
+  struct proc *curproc = myproc();
+  if (len<=0 || c_addr+(len*PGSIZE)>curproc->sz|| PGROUNDUP(c_addr)!=c_addr){
+    return -1;
+  }
+  pte_t *pte;
+  for (int i = c_addr; i < (c_addr + (len*PGSIZE)); i+= PGSIZE){
+
+     pte = walkpgdir(curproc->pgdir,(void*) i, 0);
+    if(pte && ((*pte & PTE_U) != 0) && ((*pte & PTE_P) != 0) ){
+      *pte = (*pte) | (PTE_W) ; //Set write bit 
+    } else {
+      return -1;
+    }
+
+
+  }
+
+  lcr3(V2P(curproc->pgdir)); 
+  return 0;
+}

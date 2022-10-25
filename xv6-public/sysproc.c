@@ -105,9 +105,23 @@ int sys_settickets(void){
 }
 
 int sys_mprotect(void){
-  return 0;
+  int len;
+  void* ptr;
+  if (argptr(0,(void*)&ptr,sizeof(struct pstat*)) < 0)
+    return -1;
+  if(argint(1,&len)<0)
+    return -1;
+  
+  return mprotect(ptr,len);
 }
 
 int sys_munprotect(void){
-  return 0;
+  int len;
+  void* ptr;
+  if (argptr(0,(void*)&ptr,sizeof(struct pstat*)) < 0)
+    return -1;
+  if(argint(1,&len)<0)
+    return -1;
+  
+  return munprotect(ptr,len);
 }
