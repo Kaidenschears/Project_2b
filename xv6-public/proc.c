@@ -220,7 +220,7 @@ fork(void)
 
   np->state = RUNNABLE;
   np->priority=curproc->priority; //sets priority to the same as parent process 
-  np->ticks=0;
+  np->ticks=0; 
 
   release(&ptable.lock);
 
@@ -568,7 +568,7 @@ int getpinfo(struct pstat *ptr){
 
       ptr->pid[i]=p->pid;
 
-      ptr->priority[i]=p->priority;
+      ptr->tickets[i]=p->priority;
 
       ptr->ticks[i]=p->ticks;
 
@@ -579,6 +579,9 @@ int getpinfo(struct pstat *ptr){
 }
 int settickets(int num){
   struct proc *p = myproc();
-  p->priority=num;
+  if (num==1||num==0)
+    p->priority=num;
+  else
+    return -1;
   return 0;
 }
